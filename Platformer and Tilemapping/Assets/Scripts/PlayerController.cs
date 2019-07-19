@@ -1,22 +1,43 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     private Rigidbody2D rb2d;
     public float speed;
     public float jumpForce;
+    public Text scoreText;
+    public Text winText;
+    private int score;
+    public Text livesText;
+    public Text loseText;
+    private int lives; 
+   public AudioClip MusicCLipOne;
+   public AudioSource MusicSource;
     
     void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
+        score = 0;
+        lives = 3;
+        loseText.text = "";
+        winText.text = "";
+        SetScoreText ();
+        SetLivesText ();
+        AudioSource musicSource = GetComponent<AudioSource>();
+        MusicSource.clip = MusicCLipOne;
+
     }
     
     void Update()
     {
         if (Input.GetKey("escape"))
+     {   
      Application.Quit();
+    }
+     MusicSource.Play ();
     }
     void FixedUpdate()
     {
@@ -32,6 +53,44 @@ public class PlayerController : MonoBehaviour
             {
                 rb2d.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
             }
+        }
+    }
+    void OnTriggerEnter2D (Collider2D other)
+    {
+        if (other.gameObject.CompareTag ("Pickup"))
+        {
+            other.gameObject.SetActive (false);
+            score = score + 1;
+            SetScoreText();
+        }
+        else if (other.gameObject.CompareTag ("Enemy"))
+        {
+            other.gameObject.SetActive (false);
+            lives = lives - 1;
+            SetLivesText ();
+        }
+        if (score == 4)
+        {
+            transform.position = new Vector2 ( 41.0f, transform.position.y );
+            lives = 3;
+        }
+    }
+    void SetScoreText ()
+    {
+        scoreText.text = "Score: " + score.ToString ();
+        if (score == 8)
+        {
+            winText.text = "You Win!";
+            MusicSource.Stop ();
+        }
+    }
+    void SetLivesText ()
+    {
+        livesText.text = "Lives: " + lives.ToString ();
+        if (lives == 0)
+        {
+            loseText.text = "You Lose!";
+            gameObject.SetActive (false);
         }
     }
 }
